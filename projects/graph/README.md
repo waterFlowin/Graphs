@@ -3,66 +3,73 @@
 This is a multi-stage project to draw a graph and show the connected
 components of that graph in different colors.
 
-## Phase 1: Graph, Vertex, Edge Classes
+A designer on your team has provided a mockup for what the final product should look like:  https://github.com/LambdaSchool/Graphs/blob/master/projects/graph/UI:UX%20Mockup.png
 
-In the file `graph.js`, add code that implements `Graph`, `Vertex`, and
-`Edge` classes.
+Note that it should not always appear exactly like this.  The vertexes, edges, and colors should vary randomly each time the program is run.  
 
-For this project, you should have the `Graph` contain a list of
-`Vertex`es, and have each `Vertex` contain a list of `Edge`s. Each
-`Edge` would have a `destination` and a `weight`.
+## Part 1: Graph, Vertex, Edge Classes
 
-**NOTE**: A later phase of this project will make use of code in
-`graph.js` that generates random graphs, called `randomize()`. Examine
-this code for clues as to how to implement `Graph`, `Vertex` and `Edge`
-so that it interfaces with the `randomize()` code.
+In the file `graph.py`, implement a `Graph` class that supports the API expected
+by `draw.py`. In particular, this means there should be a field `vertices` that
+contains a dictionary mapping vertex labels to edges. For example:
 
-You can make the functions in `graph.js` available to code in other
-files with the `export` keyword:
-
-```javascript
-export class Graph { 
-  // ...
-```
-
-## Phase 2: HTML Canvas and React
-
-A _canvas_ in HTML is a bitmap that you can draw to using various
-drawing primitives. We'll use this to draw our graph on the screen.
-
-Here is some example boilerplate for implementing a canvas component in
-React and drawing to it:
-
-```javascript
-class GraphView extends Component {
-  componentDidMount() {
-    this.update();
-  }
-
-  componentDidUpdate() {
-    this.update();
-  }
-
-  update() {
-    let canvas = this.refs.canvas;
-    let ctx = canvas.getContext('2d');
-    
-    // Clear the canvas
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Draw some stuff
-    // ...
-  }
-
-  render() {
-    return <canvas ref="canvas" width={canvasWidth} height={canvasHeight}></canvas>;
-  }
+```python
+{
+    '0': {'1', '3'},
+    '1': {'0'},
+    '2': set(),
+    '3': {'0'}
 }
 ```
 
-Use Google-fu to figure out how to draw lines (for edges) and circles (for vertexes).
+This represents a graph with three vertices and two total (bidirectional) edges.
+The vertex `'2'` has no edges, while `'0'` is connected to both `'1'` and `'3'`.
 
+You should also create `add_vertex` and `add_edge` methods that add the
+specified entities to the graph. To test your implementation, instantiate an
+empty graph and then try to run the following:
+
+```python
+graph = Graph()  # Instantiate your graph
+graph.add_vertex('0')
+graph.add_vertex('1')
+graph.add_vertex('2')
+graph.add_vertex('3')
+graph.add_edge('0', '1')
+graph.add_edge('0', '3')
+print(graph.vertices)
+```
+
+You should see something like the first example. As a stretch goal, add checks
+to your graph to ensure that edges to nonexistent vertices are rejected.
+
+```python
+# Continuing from previous example
+graph.add_edge('0', '4')  # No '4' vertex, should raise an Exception!
+```
+
+
+## Phase 2: Drawing with Bokeh
+
+In `draw.py`, implement the `BokehGraph` class. The constructor should accept a
+`Graph` object (as you implemented in part 1), and optionally other parameters
+configuring e.g. graphical settings. The `show` method should use Bokeh to
+generate and display HTML that draws the graph - the included `Pipfile` will
+install Bokeh and necessarily dependencies.
+
+This is purposefully open-ended, so feel free to get creative. But also, ask
+questions to avoid being blocked, and generally discuss and work from lecture
+examples.
+
+Helpful resources:
+- https://bokeh.pydata.org/en/latest/
+- https://bokeh.pydata.org/en/latest/docs/user_guide/graph.html
+
+To test your implementation, try drawing your graph from part 1, and share your
+result with the class!
+
+
+# Below are JS goals - they will be translated to Python shortly
 
 ## Phase 3: Draw a Random Graph
 
@@ -110,3 +117,32 @@ a random color for the edges of connected component.
 Instead of hitting reload, it would be nice to have a button that you
 could press to generate a new random graph and show the connected
 components.
+
+## Stretch 1:
+
+Add random edge weights, integers from 1-10. Draw the weight near the center of the edge.
+
+> Hint: the center of a line is at point _x_,_y_, where _x_ is the average of
+> the x coordinates of the endpoints of the line, and _y_ is the average of the
+> y coordinates of the endpoints of the line.
+
+Even though there are two edges between each connected vertex on the graph,
+there should only be one label (since the edges are effectively a single,
+non-directed edge.)
+
+
+## Stretch 2:
+
+Figure out which vertex a user is clicking on when they click with a mouse.
+`console.log` the vertex value when they do to test.
+
+Allow the user to select two verts: starting and ending.
+
+
+## Stretch 3:
+
+Implement [Dijkstra's
+Algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) to find the
+shortest route between starting and ending points from Stretch 2.
+
+Highlight the route.
